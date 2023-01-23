@@ -2,6 +2,17 @@ td {
     cursor: pointer;
 }
 
-td:hover {
-    background-color: darkgrey;
+tr:hover td{
+    background-color: #26282b;
+}
+
+.spanText{
+    color: white;
+    font-size: 16px;
+}
+
+.badge{
+    color: lightgreen;
+    padding-bottom: 0;
+    font-size: 16px;
 }

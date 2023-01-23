@@ -8,7 +8,7 @@ const options = {
 
 fetch('https://coinranking1.p.rapidapi.com/coins?referenceCurrencyUuid=yhjMzLPhuIDl&timePeriod=24h&tiers%5B0%5D=1&orderBy=marketCap&orderDirection=desc&limit=50&offset=0', options)
 	.then(response => response.json())
-	.then(response => createCoinsTable(response.data.coins))
+	.then(response => getDataFromApi(response.data))
 	.catch(err => console.error(err));
 
 function createCoinsTable(data){
@@ -21,18 +21,36 @@ function createCoinsTable(data){
         //coinsTableRowElement.id = element.uuid;
         //coinsTableRowElement.innerHTML = `       
         coinsTableBodyElement.innerHTML += `
-        <tr id="${element.uuid}" onClick="displayCoinModal(this.id)">
+        <tr id="${element.uuid}" onClick="displayCoinModal(this.id)" class="coinsRow">
             <td>${element.rank}</td>
             <td><img src="${element.iconUrl}" width="24px" alt="${element.name} icon" > ${element.name}</td>
             <td>${element.symbol}</td>
             <td>${priceFormatted}</td>
             <td><font color=${changeColor}>${element.change}</td>
             <td>${marketCapFormatted}</td>
-        </tr>
-        `;
-
-        //coinsTableBodyElement.appendChild(coinsTableRowElement);
+            <td><i class="fa-solid fa-star"></i></td>
+        </tr>`;        //coinsTableBodyElement.appendChild(coinsTableRowElement);
     });
+}
+
+function addCoinToFavorites(coinId){
+
+}
+
+function getDataFromApi(data){
+    createCoinsTable(data.coins);
+    createNavigationBar(data.stats);
+}
+
+function createNavigationBar(data){
+    const statsBodyElement = document.getElementById("statsBody");
+    statsBodyElement.innerHTML += `
+        <span class="spanText">Total coins: </span><span id="span_1" class="badge"> ${data.totalCoins}</span>
+        <span class="spanText">Total markets: </span><span id="span_2" class="badge">${data.totalMarkets}</span>
+        <span class="spanText">Total exchanges: </span><span id="span_3" class="badge">${data.totalExchanges}</span>
+        <span class="spanText">Total Market Cap: </span><span id="span_4" class="badge">${data.totalMarketCap}</span>
+        <span class="spanText">Total 24h Volume: </span><span id="span_5" class="badge">${data.total24hVolume}</span>
+    `
 }
 
 function displayCoinModal(coinId){
