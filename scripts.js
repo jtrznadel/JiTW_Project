@@ -21,20 +21,32 @@ function createCoinsTable(data){
         //coinsTableRowElement.id = element.uuid;
         //coinsTableRowElement.innerHTML = `       
         coinsTableBodyElement.innerHTML += `
-        <tr id="${element.uuid}" onClick="displayCoinModal(this.id)" class="coinsRow">
+        <tr id="${element.uuid}" class="coinsRow">
             <td>${element.rank}</td>
-            <td><img src="${element.iconUrl}" width="24px" alt="${element.name} icon" > ${element.name}</td>
-            <td>${element.symbol}</td>
-            <td>${priceFormatted}</td>
-            <td><font color=${changeColor}>${element.change}</td>
+            <td onClick="displayCoinModal(this.parentNode.id)"><img src="${element.iconUrl}" width="24px" alt="${element.name} icon" > ${element.name}</td>
+            <td onClick="displayCoinModal(this.parentNode.id)">${element.symbol}</td>
+            <td onClick="displayCoinModal(this.parentNode.id)">${priceFormatted}</td>
+            <td onClick="displayCoinModal(this.parentNode.id)"><font color=${changeColor}>${element.change}</td>
             <td>${marketCapFormatted}</td>
-            <td><i class="fa-solid fa-star"></i></td>
+            <td><i id="icon${element.uuid}" class="fa-solid fa-star" onClick="addCoinToFavorites(this.id)"></i></td>
         </tr>`;        //coinsTableBodyElement.appendChild(coinsTableRowElement);
     });
 }
 
 function addCoinToFavorites(coinId){
-
+    let iconElement = document.getElementById(coinId);
+    let coinUuid = coinId.replace("icon", "");
+    if(favoritesList.includes(coinUuid)){
+        const index = favoritesList.findIndex((num) => num === coinUuid);
+        favoritesList.splice(index, 1);
+        iconElement.classList.remove("text-warning");
+        localStorage.favorites = JSON.stringify(favoritesList);
+    }
+    else{
+        favoritesList.push(coinUuid);
+        iconElement.classList.add("text-warning");
+        localStorage.favorites = JSON.stringify(favoritesList);
+    }
 }
 
 function getDataFromApi(data){
@@ -82,3 +94,10 @@ function changeCoinModalData(coinData){
     modalTitle.innerHTML = coinData.name;
 };
 
+let favoritesList = new Array();
+if(localStorage.favorites != undefined){
+    localStorage.favorites = JSON.stringify(favoritesList);
+}
+else{
+    favoritesList = JSON.parse(localStorage.favorites);
+}
