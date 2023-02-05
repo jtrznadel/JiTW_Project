@@ -11,9 +11,31 @@ fetch('https://coinranking1.p.rapidapi.com/coins?referenceCurrencyUuid=yhjMzLPhu
 	.then(response => getDataFromApi(response.data))
 	.catch(err => console.error(err));
 
+function createFavoriteCoinsTable(){
+    
+    const coinsTableBodyElement = document.getElementById("coinsTableBody");
+    favoritesList.forEach(element => {
+        let coinElement = data.find(uuid == element.coinUuid);
+        let priceFormatted = parseFloat(coinElement.price).toLocaleString("en-US", {style:"currency", currency:"USD"});
+        let marketCapFormatted = parseInt(coinElement.marketCap).toLocaleString("en-US", {style:"currency", currency:"USD"});
+        changeColor = coinElement.change > 0 ? "green" : "red";
+        coinsTableBodyElement.innerHTML += `
+        <tr id="${coinElement.uuid}" class="coinsRow">
+            <td>${coinElement.rank}</td>
+            <td onClick="displayCoinModal(this.parentNode.id)"><img src="${coinElement.iconUrl}" width="24px" alt="${element.name} icon" > ${element.name}</td>
+            <td onClick="displayCoinModal(this.parentNode.id)">${coinElement.symbol}</td>
+            <td onClick="displayCoinModal(this.parentNode.id)">${priceFormatted}</td>
+            <td onClick="displayCoinModal(this.parentNode.id)"><font color=${changeColor}>${coinElement.change}</td>
+            <td>${marketCapFormatted}</td>
+            <td><i id="icon${coinElement.uuid}" class="fa-solid fa-star ${isCoinInFavorite ? 'text-warning' : ''}" onClick="addCoinToFavorites(this.id)"></i></td>
+        </tr>`;        
+    })
+}
+
 function createCoinsTable(data){
     const coinsTableBodyElement = document.getElementById("coinsTableBody");
     data.forEach(element => {
+        let isCoinInFavorite = favoritesList.includes(element.uuid);
         let priceFormatted = parseFloat(element.price).toLocaleString("en-US", {style:"currency", currency:"USD"});
         let marketCapFormatted = parseInt(element.marketCap).toLocaleString("en-US", {style:"currency", currency:"USD"});
         changeColor = element.change > 0 ? "green" : "red";
@@ -28,24 +50,25 @@ function createCoinsTable(data){
             <td onClick="displayCoinModal(this.parentNode.id)">${priceFormatted}</td>
             <td onClick="displayCoinModal(this.parentNode.id)"><font color=${changeColor}>${element.change}</td>
             <td>${marketCapFormatted}</td>
-            <td><i id="icon${element.uuid}" class="fa-solid fa-star" onClick="addCoinToFavorites(this.id)"></i></td>
+            <td><i id="icon${element.uuid}" class="fa-solid fa-star ${isCoinInFavorite ? 'text-warning' : ''}" onClick="addCoinToFavorites(this.id)"></i></td>
         </tr>`;        //coinsTableBodyElement.appendChild(coinsTableRowElement);
-    });
-}
+    })}
 
 function addCoinToFavorites(coinId){
     let iconElement = document.getElementById(coinId);
-    let coinUuid = coinId.replace("icon", "");
-    if(favoritesList.includes(coinUuid)){
-        const index = favoritesList.findIndex((num) => num === coinUuid);
+    let coinUuid = coinId.replace("icon","");
+    if(iconElement.classList.contains("text-warning")){
+        let index = favoritesList.indexOf(coinUuid);
         favoritesList.splice(index, 1);
-        iconElement.classList.remove("text-warning");
         localStorage.favorites = JSON.stringify(favoritesList);
+        iconElement.classList.remove("text-warning");
+
     }
     else{
         favoritesList.push(coinUuid);
-        iconElement.classList.add("text-warning");
         localStorage.favorites = JSON.stringify(favoritesList);
+        iconElement.classList.add("text-warning");
+
     }
 }
 
@@ -57,6 +80,7 @@ function getDataFromApi(data){
 function createNavigationBar(data){
     const statsBodyElement = document.getElementById("statsBody");
     statsBodyElement.innerHTML += `
+        <span class="spanText" id="favoritesButton" style="margin-right: 10px" onclick="createFavoritesTable()">Favorites</span>
         <span class="spanText">Total coins: </span><span id="span_1" class="badge"> ${data.totalCoins}</span>
         <span class="spanText">Total markets: </span><span id="span_2" class="badge">${data.totalMarkets}</span>
         <span class="spanText">Total exchanges: </span><span id="span_3" class="badge">${data.totalExchanges}</span>
@@ -95,7 +119,7 @@ function changeCoinModalData(coinData){
 };
 
 let favoritesList = new Array();
-if(localStorage.favorites != undefined){
+if(localStorage.favorites == undefined){
     localStorage.favorites = JSON.stringify(favoritesList);
 }
 else{
