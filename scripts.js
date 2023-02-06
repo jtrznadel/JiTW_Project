@@ -5,54 +5,57 @@ const options = {
 		'X-RapidAPI-Host': 'coinranking1.p.rapidapi.com'
 	}
 };
-
 fetch('https://coinranking1.p.rapidapi.com/coins?referenceCurrencyUuid=yhjMzLPhuIDl&timePeriod=24h&tiers%5B0%5D=1&orderBy=marketCap&orderDirection=desc&limit=50&offset=0', options)
 	.then(response => response.json())
 	.then(response => getDataFromApi(response.data))
 	.catch(err => console.error(err));
 
-function createFavoriteCoinsTable(){
-    
-    const coinsTableBodyElement = document.getElementById("coinsTableBody");
-    favoritesList.forEach(element => {
-        let coinElement = data.find(uuid == element.coinUuid);
-        let priceFormatted = parseFloat(coinElement.price).toLocaleString("en-US", {style:"currency", currency:"USD"});
-        let marketCapFormatted = parseInt(coinElement.marketCap).toLocaleString("en-US", {style:"currency", currency:"USD"});
-        changeColor = coinElement.change > 0 ? "green" : "red";
-        coinsTableBodyElement.innerHTML += `
-        <tr id="${coinElement.uuid}" class="coinsRow">
-            <td>${coinElement.rank}</td>
-            <td onClick="displayCoinModal(this.parentNode.id)"><img src="${coinElement.iconUrl}" width="24px" alt="${element.name} icon" > ${element.name}</td>
-            <td onClick="displayCoinModal(this.parentNode.id)">${coinElement.symbol}</td>
-            <td onClick="displayCoinModal(this.parentNode.id)">${priceFormatted}</td>
-            <td onClick="displayCoinModal(this.parentNode.id)"><font color=${changeColor}>${coinElement.change}</td>
-            <td>${marketCapFormatted}</td>
-            <td><i id="icon${coinElement.uuid}" class="fa-solid fa-star ${isCoinInFavorite ? 'text-warning' : ''}" onClick="addCoinToFavorites(this.id)"></i></td>
-        </tr>`;        
-    })
-}
 
 function createCoinsTable(data){
     const coinsTableBodyElement = document.getElementById("coinsTableBody");
-    data.forEach(element => {
-        let isCoinInFavorite = favoritesList.includes(element.uuid);
-        let priceFormatted = parseFloat(element.price).toLocaleString("en-US", {style:"currency", currency:"USD"});
-        let marketCapFormatted = parseInt(element.marketCap).toLocaleString("en-US", {style:"currency", currency:"USD"});
-        changeColor = element.change > 0 ? "green" : "red";
-        //const coinsTableRowElement = document.createElement("tr");
-        //coinsTableRowElement.id = element.uuid;
-        //coinsTableRowElement.innerHTML = `       
-        coinsTableBodyElement.innerHTML += `
-        <tr id="${element.uuid}" class="coinsRow">
-            <td>${element.rank}</td>
-            <td onClick="displayCoinModal(this.parentNode.id)"><img src="${element.iconUrl}" width="24px" alt="${element.name} icon" > ${element.name}</td>
-            <td onClick="displayCoinModal(this.parentNode.id)">${element.symbol}</td>
-            <td onClick="displayCoinModal(this.parentNode.id)">${priceFormatted}</td>
-            <td onClick="displayCoinModal(this.parentNode.id)"><font color=${changeColor}>${element.change}</td>
-            <td>${marketCapFormatted}</td>
-            <td><i id="icon${element.uuid}" class="fa-solid fa-star ${isCoinInFavorite ? 'text-warning' : ''}" onClick="addCoinToFavorites(this.id)"></i></td>
-        </tr>`;        //coinsTableBodyElement.appendChild(coinsTableRowElement);
-    })}
+    let checkboxFlag = document.getElementById('favoriteCheckbox').checked;
+    if(!checkboxFlag){
+        data.forEach(element => {
+            let isCoinInFavorite = favoritesList.includes(element.uuid);
+            let priceFormatted = parseFloat(element.price).toLocaleString("en-US", {style:"currency", currency:"USD"});
+            let marketCapFormatted = parseInt(element.marketCap).toLocaleString("en-US", {style:"currency", currency:"USD"});
+            changeColor = element.change > 0 ? "green" : "red";      
+            coinsTableBodyElement.innerHTML += `
+            <tr id="${element.uuid}" class="coinsRow">
+                <td>${element.rank}</td>
+                <td onClick="displayCoinModal(this.parentNode.id)"><img src="${element.iconUrl}" width="24px" alt="${element.name} icon" > ${element.name}</td>
+                <td onClick="displayCoinModal(this.parentNode.id)">${element.symbol}</td>
+                <td onClick="displayCoinModal(this.parentNode.id)">${priceFormatted}</td>
+                <td onClick="displayCoinModal(this.parentNode.id)"><font color=${changeColor}>${element.change}</td>
+                <td>${marketCapFormatted}</td>
+                <td><i id="icon${element.uuid}" class="fa-solid fa-star ${isCoinInFavorite ? 'text-warning' : ''}" onClick="addCoinToFavorites(this.id)"></i></td>
+            </tr>`;       
+        })
+    }
+    else{
+        let newData = new Array();
+        favoritesList.forEach(element => {
+            let elementToAppend = data.find(temp => temp.uuid == element);
+            newData.push(elementToAppend);
+        })
+        newData.forEach(element => {
+            let isCoinInFavorite = favoritesList.includes(element.uuid);
+            let priceFormatted = parseFloat(element.price).toLocaleString("en-US", {style:"currency", currency:"USD"});
+            let marketCapFormatted = parseInt(element.marketCap).toLocaleString("en-US", {style:"currency", currency:"USD"});
+            changeColor = element.change > 0 ? "green" : "red";      
+            coinsTableBodyElement.innerHTML += `
+            <tr id="${element.uuid}" class="coinsRow">
+                <td>${element.rank}</td>
+                <td onClick="displayCoinModal(this.parentNode.id)"><img src="${element.iconUrl}" width="24px" alt="${element.name} icon" > ${element.name}</td>
+                <td onClick="displayCoinModal(this.parentNode.id)">${element.symbol}</td>
+                <td onClick="displayCoinModal(this.parentNode.id)">${priceFormatted}</td>
+                <td onClick="displayCoinModal(this.parentNode.id)"><font color=${changeColor}>${element.change}</td>
+                <td>${marketCapFormatted}</td>
+                <td><i id="icon${element.uuid}" class="fa-solid fa-star ${isCoinInFavorite ? 'text-warning' : ''}" onClick="addCoinToFavorites(this.id)"></i></td>
+            </tr>`;       
+        })
+    }
+}
 
 function addCoinToFavorites(coinId){
     let iconElement = document.getElementById(coinId);
@@ -80,7 +83,6 @@ function getDataFromApi(data){
 function createNavigationBar(data){
     const statsBodyElement = document.getElementById("statsBody");
     statsBodyElement.innerHTML += `
-        <span class="spanText" id="favoritesButton" style="margin-right: 10px" onclick="createFavoritesTable()">Favorites</span>
         <span class="spanText">Total coins: </span><span id="span_1" class="badge"> ${data.totalCoins}</span>
         <span class="spanText">Total markets: </span><span id="span_2" class="badge">${data.totalMarkets}</span>
         <span class="spanText">Total exchanges: </span><span id="span_3" class="badge">${data.totalExchanges}</span>
@@ -125,3 +127,20 @@ if(localStorage.favorites == undefined){
 else{
     favoritesList = JSON.parse(localStorage.favorites);
 }
+
+function save(){
+    const checkbox = document.getElementById('favoriteCheckbox');
+    localStorage.setItem('favoriteCheckbox', checkbox.checked);
+}
+
+// function load(){    
+//     let checked = JSON.parse(localStorage.favoriteCheckbox);
+//     console.log(checked);
+//     document.getElementById('favoriteCheckbox').checked = checked;
+// }
+
+// function save(){
+//     let checkbox = document.getElementById('favoriteCheckbox');
+//     localStorage.setItem('favoriteCheckbox', checkbox.checked);
+// }
+
